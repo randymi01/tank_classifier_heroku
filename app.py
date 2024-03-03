@@ -1,5 +1,4 @@
 from flask import Flask, jsonify, request, render_template
-from flask_mail import Mail, Message
 import io
 from torchvision import transforms
 import requests as re
@@ -7,8 +6,6 @@ import torch
 import base64
 from torchvision.models import resnet18
 from model import VGG
-
-from matplotlib import pyplot as plt
 
 import torchvision.transforms as transforms
 from PIL import Image
