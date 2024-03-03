@@ -1,4 +1,4 @@
-torch==2.0.1+cpu
+https://download.pytorch.org/whl/cpu/torch-2.0.1%2Bcpu-cp310-cp310-linux_x86_64.whl#sha256=fec257249ba014c68629a1994b0c6e7356e20e1afc77a87b9941a40e5095285d
 Flask==3.0.2
-torchvision==0.15.2+cpu
+https://download.pytorch.org/whl/cpu/torchvision-0.10.0%2Bcpu-cp39-cp39-linux_x86_64.whl#sha256=df9d4ebc93d30e1843c09c9e521e681e893ea816cbb745b2d0f77c8704c9c309
 Pillow==10.0.0
