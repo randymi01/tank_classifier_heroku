@@ -1,4 +1,4 @@
-tensorflow==2.14.0
+torch==2.0.1+cpu
 Flask==3.0.2
-torchvision==0.15.2
+torchvision==0.15.2+cpu
 Pillow==10.0.0
