@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russian Tank Destroyed or Not Classifier</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 18px;
+        }
+
+        #content{
+            margin: 20px;
+        }
+
+        #bar{
+            opacity: 0.5;
+        }
+
+        #dropArea {
+            border: 2px dashed #ccc;
+            padding: 80px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        #dropArea:hover {
+            border-color: #007bff;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        #urlForm, #predictionForm {
+            margin-top: 20px;
+        }
+
+        #confirmationMessage {
+            margin-top: 20px;
+        }
+
+        #predictionResults {
+            margin-top: 20px;
+        }
+
+        #predictedImage {
+            display: none;
+            margin-top: 20px;
+            max-width: 100%;
+        }
+
+        #statusBar {
+            background: linear-gradient(to right, #38414b, #1c1f25);
+            background-color: #343a40;
+            color: white;
+            padding: 10px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+            margin: 0 auto;
+            margin-left: 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        #statusSections {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            margin-left: 0;
+            align-items: center;
+        }
+
+        #statusSections > div:not(:last-child) {
+            margin-right: 20px; /* Adjust the value as needed */
+        }
+
+        #titleSection {
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* Buttons */
+        #buttonsBox {
+            display: none;
+            margin-top: 20px;
+            width: 50%;
+        }
+        #submit {
+            background-color: #38414b
+        }
+
+        #buttons {
+            display: flex;
+            margin-top: 10px;
+            padding: 10px;
+        }
+
+        #resultMessage {
+            margin-top: 20px;
+        }
+
+        /* Added spacing between buttons */
+        #buttons button {
+            margin-right: 20px;
+        }
+
+        .inheretcolor{
+            color:inherit;
+            text-decoration: inherit;
+        }
+    </style>
+</head>
+<body>
+    <div id="statusBar">
+        <div id="statusSections" class="container">
+            <div><a class="inheretcolor" href = "about">About Model</a></div>
+            <div id="bar">|</div>
+            <div><a class="inheretcolor" href = "contact">Contact</a></div>
+            <div id="bar">|</div>
+            <div><a class="inheretcolor" href = "https://github.com/randymi01/russian_tank_destroyed_or_not">Code</a></div>
+        </div>
+    </div>
+    <br>
+    <br>
+    <div id="content">
+<hr>
+<h1 id="russian-tank-destroyed-or-not-classifier">Russian Tank Destroyed or Not Classifier</h1>
+<p>Binary Image Classifier for whether a tank is destroyed or not using images from <a href = https://www.oryxspioenkop.com/2022/02/attack-on-europe-documenting-equipment.html>Oryx&#39;s</a> collection of confirmed Russian armor losses.</p>
+<p>Two models were trained:</p>
+<ol>
+<li>VGG</li>
+<li>Finetuned Resnet18</li>
+</ol>
+<h2 id="model-description-and-architecture">Model Description and Architecture</h2>
+<p>Models were trained in Pytorch. VGG was built from scratch while resnet18 was finetuned on pytorch&#39;s base resnet18 model with weights from IMAGENET1K_V1. Documentation for pytorch&#39;s resnet18 can be found <a href = https://pytorch.org/vision/main/models/generated/torchvision.models.resnet18.html>here</a>.</p>
+<h3 id="vgg-model-architecture-">VGG Model Architecture:</h3>
+<pre><code>VGG(
+  (<span class="hljs-name">features</span>): Sequential(
+    (<span class="hljs-number">0</span>): Conv2d(<span class="hljs-number">3</span>, <span class="hljs-number">64</span>, kernel_size=(<span class="hljs-number">3</span>, <span class="hljs-number">3</span>), stride=(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>), padding=(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>))
+    (<span class="hljs-number">1</span>): BatchNorm2d(<span class="hljs-number">64</span>, eps=1e-05, momentum=0.<span class="hljs-number">1</span>, affine=True, track_running_stats=True)
+    (<span class="hljs-number">2</span>): ReLU(<span class="hljs-name">inplace=True</span>)
+    (<span class="hljs-number">3</span>): MaxPool2d(<span class="hljs-name">kernel_size=2</span>, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (<span class="hljs-number">4</span>): Conv2d(<span class="hljs-number">64</span>, <span class="hljs-number">128</span>, kernel_size=(<span class="hljs-number">3</span>, <span class="hljs-number">3</span>), stride=(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>), padding=(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>))
+    (<span class="hljs-number">5</span>): BatchNorm2d(<span class="hljs-number">128</span>, eps=1e-05, momentum=0.<span class="hljs-number">1</span>, affine=True, track_running_stats=True)
+    (<span class="hljs-number">6</span>): ReLU(<span class="hljs-name">inplace=True</span>)
+    (<span class="hljs-number">7</span>): MaxPool2d(<span class="hljs-name">kernel_size=2</span>, stride=2, padding=0, dilation=1, ceil_mode=False)
+    (<span class="hljs-number">8</span>): Conv2d(<span class="hljs-number">128</span>, <span class="hljs-number">128</span>, kernel_size=(<span class="hljs-number">3</span>, <span class="hljs-number">3</span>), stride=(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>), padding=(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>))
+    (<span class="hljs-number">9</span>): BatchNorm2d(<span class="hljs-number">128</span>, eps=1e-05, momentum=0.<span class="hljs-number">1</span>, affine=True, track_running_stats=True)
+    (<span class="hljs-number">10</span>): ReLU(<span class="hljs-name">inplace=True</span>)
+    (<span class="hljs-number">11</span>): Conv2d(<span class="hljs-number">128</span>, <span class="hljs-number">128</span>, kernel_size=(<span class="hljs-number">3</span>, <span class="hljs-number">3</span>), stride=(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>), padding=(<span class="hljs-number">1</span>, <span class="hljs-number">1</span>))
+    (<span class="hljs-number">12</span>): BatchNorm2d(<span class="hljs-number">128</span>, eps=1e-05, momentum=0.<span class="hljs-number">1</span>, affine=True, track_running_stats=True)
+    (<span class="hljs-number">13</span>): ReLU(<span class="hljs-name">inplace=True</span>)
+    (<span class="hljs-number">14</span>): MaxPool2d(<span class="hljs-name">kernel_size=2</span>, stride=2, padding=0, dilation=1, ceil_mode=False)
+  )
+  (<span class="hljs-name">avgpool</span>): AdaptiveAvgPool2d(<span class="hljs-name">output_size=</span>(<span class="hljs-number">5</span>, <span class="hljs-number">5</span>))
+  (<span class="hljs-name">classifier</span>): Sequential(
+    (<span class="hljs-number">0</span>): Linear(<span class="hljs-name">in_features=3200</span>, out_features=512, bias=True)
+    (<span class="hljs-number">1</span>): ReLU(<span class="hljs-name">inplace=True</span>)
+    (<span class="hljs-number">2</span>): Dropout(<span class="hljs-name">p=0</span>.<span class="hljs-number">3</span>, inplace=False)
+    (<span class="hljs-number">3</span>): Linear(<span class="hljs-name">in_features=512</span>, out_features=256, bias=True)
+    (<span class="hljs-number">4</span>): ReLU(<span class="hljs-name">inplace=True</span>)
+    (<span class="hljs-number">5</span>): Dropout(<span class="hljs-name">p=0</span>.<span class="hljs-number">3</span>, inplace=False)
+    (<span class="hljs-number">6</span>): Linear(<span class="hljs-name">in_features=256</span>, out_features=1, bias=True)
+    (<span class="hljs-number">7</span>): Sigmoid()
+  )
+)
+</code></pre><h2 id="training-details">Training Details</h2>
+<h3 id="dataset-">Dataset:</h3>
+<p>Training data was sourced from a <a href = https://www.kaggle.com/datasets/piterfm/2022-ukraine-russia-war-equipment-losses-oryx>kaggle </a>dataset compiling images from Oryx&#39;s site. Only Russian tank images were used for training.</p>
+<p>Image filenames in the original dataset contain a list of tags: [&#39;destroyed&#39;, &#39;captured&#39;, &#39;abandoned&#39;]. Some images have multiple tags as a result of a vehicle being for example both abandoned then captured, or as a result of an image having multiple vehicles. Images with multiple vehicles or no tags were excluded. Single vehicle images with multiple tags were considered not destroyed if the destroyed tag was not present in the image filename.</p>
+<p>After data cleaning and labeling, there were 487 destroyed tanks and 228 not destroyed tanks. These images were split 85/15 into a training and validation set. Imbalanced class representation was by using a weighted random sampler that overweighted the minority &quot;not destroyed&quot; class.</p>
+<p>Images were resized and manipulated using the following transformation:</p>
+<pre><code>mean = np.array([<span class="hljs-number">0.485</span>, <span class="hljs-number">0.456</span>, <span class="hljs-number">0.406</span>])
+std = np.array([<span class="hljs-number">0.229</span>, <span class="hljs-number">0.224</span>, <span class="hljs-number">0.225</span>])
+
+composed_transform = transforms.Compose([transforms.Resize((<span class="hljs-number">256</span>, <span class="hljs-number">256</span>)),
+                                         transforms.RandomHorizontalFlip(),
+                                         transforms.ToTensor(),
+                                         transforms.Normalize(mean, std)])
+</code></pre><h3 id="model-hyperparameters-">Model Hyperparameters:</h3>
+<p>VGG:</p>
+<ul>
+<li>Batch Size = 16</li>
+<li>Epochs = 20</li>
+<li>lr = 1e-3</li>
+<li>dropout_rate = 0.3</li>
+<li>Optimizer = Adam</li>
+<li>Loss = BCELoss</li>
+</ul>
+<p>Resnet18:</p>
+<ul>
+<li>Batch Size = 16</li>
+<li>Epochs = 46</li>
+<li>lr = 1e-3</li>
+<li>Optimizer = Adam</li>
+<li>Loss = CrossEntropyLoss</li>
+</ul>
+<h3 id="results">Results:</h3>
+<p><img src="https://cdn-uploads.huggingface.co/production/uploads/63df328115266dd945fc01f4/EsT_MvYdLNDOXVkzRqFxt.png" alt="image/png" style="width: 75%;" ></p>
+<p><img src="https://cdn-uploads.huggingface.co/production/uploads/63df328115266dd945fc01f4/srkSSvYqa8erEoVqrAjnc.png" alt="image/png" style="width: 75%;"></p>
+<p>VGG: 73% Accuracy Validation set</p>
+<p>Resnet18: 90% Accuracy Validaton set</p>
+<p>Has limited ability to correctly recognize the states of vehicles outside of the training scope.</p>
+<div class="image-container" style="display: flex;">
+<p><img src="https://cdn-uploads.huggingface.co/production/uploads/63df328115266dd945fc01f4/jrVjVzh1Im_OLBSn-IB0G.png" alt="image/png"></p>
+<p><img src="https://cdn-uploads.huggingface.co/production/uploads/63df328115266dd945fc01f4/VIDZfkPJDo6gTk0AIGf0w.png" alt="image/png"></p>
+</div>
+<h3 id="limitations">Limitations:</h3>
+<p>Doesn&#39;t have the ability to recognize whether the provided image is a tank or not.</p>
+<img src="https://huggingface.co/Dingaling01/russian_tank_destroyed_or_not_cnn/resolve/main/brownie.png" alt="drawing" width="250"/>
+
+    
+    </div>
+</body>
+</html>

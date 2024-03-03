@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Russian Tank Destroyed or Not Classifier</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            font-size: 18px;
+        }
+
+        #content{
+            margin: 20px;
+        }
+
+        #bar{
+            opacity: 0.5;
+        }
+
+        #dropArea {
+            border: 2px dashed #ccc;
+            padding: 80px;
+            text-align: center;
+            cursor: pointer;
+        }
+
+        #dropArea:hover {
+            border-color: #007bff;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        #urlForm, #predictionForm {
+            margin-top: 20px;
+        }
+
+        #confirmationMessage {
+            margin-top: 20px;
+        }
+
+        #predictionResults {
+            margin-top: 20px;
+        }
+
+        #predictedImage {
+            display: none;
+            margin-top: 20px;
+            max-width: 100%;
+        }
+
+        #statusBar {
+            background: linear-gradient(to right, #38414b, #1c1f25);
+            background-color: #343a40;
+            color: white;
+            padding: 10px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            z-index: 1000;
+            margin: 0 auto;
+            margin-left: 0;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+        }
+
+        #statusSections {
+            display: flex;
+            max-width: 1200px;
+            margin: 0 auto;
+            margin-left: 0;
+            align-items: center;
+        }
+
+        #statusSections > div:not(:last-child) {
+            margin-right: 20px; /* Adjust the value as needed */
+        }
+
+        #titleSection {
+            padding: 20px;
+            text-align: center;
+        }
+
+        /* Buttons */
+        #buttonsBox {
+            display: none;
+            margin-top: 20px;
+            width: 50%;
+        }
+        #submit {
+            background-color: #38414b
+        }
+
+        #buttons {
+            display: flex;
+            margin-top: 10px;
+            padding: 10px;
+        }
+
+        #resultMessage {
+            margin-top: 20px;
+        }
+
+        /* Added spacing between buttons */
+        #buttons button {
+            margin-right: 20px;
+        }
+
+        .inheretcolor{
+            color:inherit;
+            text-decoration: inherit;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="statusBar">
+        <div id="statusSections" class="container">
+            <div><a class="inheretcolor" href = "about">About Model</a></div>
+            <div id="bar">|</div>
+            <div><a class="inheretcolor" href = "contact">Contact</a></div>
+            <div id="bar">|</div>
+            <div><a class="inheretcolor" href = "https://github.com/randymi01/russian_tank_destroyed_or_not">Code</a></div>
+        </div>
+    </div>
+    <div id="content">
+    <br>
+    <h1 class="mt-4">Russian Armor Destroyed or Not Classifier</h1>
+    <p class="lead">Upload an image or provide a URL to classify whether a Russian armored vehicle has been destroyed or not. Also works on non-Russian armor</p>
+
+    <!-- File Upload Form -->
+    <div id="dropArea" onclick="openFileInput()" ondrop="drop(event)" ondragover="allowDrop(event)">
+        <p> <i>drag &amp; drop an image here or click to select</i></p>
+        <input type="file" id="fileInput" onchange="handleFile()" accept="image/*">
+    </div>
+
+    <!-- URL Form -->
+    <form id="urlForm">
+        <label for="imageUrl" class="form-label">Image URL:</label>
+        <input type="text" id="imageUrl" name="imageUrl" class="form-control" required>
+    </form>
+
+    <!-- Model Form and Predict Button -->
+    <form id="predictionForm">
+        <label for="model" class="form-label">Model:</label>
+        <select id="model" name="model" class="form-select">
+            <option value="resnet">ResNet</option>
+            <option value="vgg">VGG</option>
+        </select>
+        <br>
+        <button id="submit" type="button" onclick="submitPrediction()" class="btn btn-primary">Predict</button>
+    </form>
+
+    <!-- Display confirmation message, form, and prediction results -->
+    <div id="confirmationMessage"></div>
+    <div id="predictionResults"></div>
+    
+    <!-- Buttons Box -->
+    <div id="buttonsBox">
+        <div id="buttons" class="container">
+            <button type="button" id='rbtn' class="btn btn-success" onclick="recordResult('Right')">Right</button>
+            <button type="button" id='wbtn' class="btn btn-danger" onclick="recordResult('Wrong')">Wrong</button>
+        </div>
+        <div id="resultMessage" class="container"></div>
+    </div>
+    
+    <img id="predictedImage" class="mt-4">
+</div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+    <script>
+        function allowDrop(event) {
+            event.preventDefault();
+            var dropArea = document.getElementById("dropArea");
+            dropArea.style.border = "2px dashed #007bff";
+        }
+
+        function colorChange(event) {
+            event.preventDefault();
+            var dropArea = document.getElementById("dropArea");
+            dropArea.style.border = "2px dashed #ccc";
+        }
+
+        function drop(event) {
+            console.log("filedropped")
+            event.preventDefault();
+            allowDrop(event); // Reset the border color when a file is dropped
+            handleFile_drop(event); // Handle the dropped file
+        }
+
+        function openFileInput() {
+            var fileInput = document.getElementById("fileInput");
+            fileInput.click();
+        }
+
+        function handleFile_drop(event) {
+        var fileInput = document.getElementById("fileInput");
+        var file;
+
+        // Check if the file is dropped
+        if (event.dataTransfer.items) {
+            // Use DataTransferItemList interface to access the file(s)
+            if (event.dataTransfer.items.length > 0) {
+                file = event.dataTransfer.items[0].getAsFile();
+            }
+        } else {
+            // Use the traditional way to access the file(s)
+            if (event.dataTransfer.files.length > 0) {
+                file = event.dataTransfer.files[0];
+            }
+        }
+
+        if (file) {
+            displayConfirmation(file.name);
+
+            // Read the file as base64
+            var reader = new FileReader();
+            reader.onload = function (e) {
+                var base64Data = e.target.result.split(',')[1];
+                sessionStorage.setItem('base64Image', base64Data);
+            };
+            reader.readAsDataURL(file);
+        }
+    }
+
+        function handleFile() {
+            var fileInput = document.getElementById("fileInput");
+            var file = fileInput.files[0];
+
+            if (file) {
+                displayConfirmation(file.name);
+
+                // Read the file as base64
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var base64Data = e.target.result.split(',')[1];
+                    sessionStorage.setItem('base64Image', base64Data);
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function displayConfirmation(fileName) {
+            var confirmationMessage = document.getElementById("confirmationMessage");
+            confirmationMessage.innerHTML = "Selected image: " + fileName + " (Click 'Predict' to continue)";
+        }
+
+        function submitPrediction() {
+            var model = document.getElementById("model").value;
+            var base64Data = sessionStorage.getItem('base64Image');
+            var imageUrl = document.getElementById("imageUrl").value;
+            var fetchstring = ""
+
+            if (!base64Data && !imageUrl) {
+                alert("Please select an image or provide an image URL.");
+                return;
+            }
+
+            var jsonData = {
+                "model": model
+            };
+
+            if (base64Data) {
+                jsonData["image_data"] = base64Data;
+                fetchstring = "/api/predict/upload"
+            } else if (imageUrl) {
+                jsonData["image_url"] = imageUrl;
+                fetchstring = "/api/predict/url"
+            }
+
+            fetch(fetchstring, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(jsonData)
+            })
+            .then(response => response.json())
+            .then(data => {
+                var predictionResultsDiv = document.getElementById("predictionResults");
+                var predictedImage = document.getElementById("predictedImage");
+                var buttonsBox = document.getElementById("buttonsBox");
+
+                if (data.error) {
+                    predictionResultsDiv.innerHTML = "<strong>Error:</strong> " + data.error;
+                } else {
+                    predictionResultsDiv.innerHTML = "<strong>Model:</strong> " + data.model +
+                                                  "<br><strong>Prediction:</strong> " + data.prediction +
+                                                  "<br><strong>Confidence:</strong> " + data.confidence;
+                    predictedImage.src = base64Data ? "data:image/jpeg;base64," + base64Data : imageUrl;
+                    predictedImage.style.display = "block";
+                    buttonsBox.style.display = "block";
+                }
+            })
+            .catch(error => {
+                var predictionResultsDiv = document.getElementById("predictionResults");
+                predictionResultsDiv.innerHTML = "<strong>Secondary Error:</strong> " + error.message;
+            });
+
+            // Clear confirmation message and reset file input
+            var confirmationMessage = document.getElementById("confirmationMessage");
+            confirmationMessage.innerHTML = "";
+            fileInput.value = null;
+            sessionStorage.removeItem('base64Image');
+        }
+
+        function recordResult(result) {
+            var rbtn = document.getElementById("rbtn");
+            var wbtn = document.getElementById("wbtn");
+            var resultMessage = document.getElementById("resultMessage");
+
+            // Implement your logic to record the result (Right/Wrong)
+            if (result === 'Right') {
+                resultMessage.innerHTML = "<strong>Result:</strong> Correct! The model's prediction was accurate. Thanks for your input.";
+            } else if (result === 'Wrong') {
+                resultMessage.innerHTML = "<strong>Result:</strong> Incorrect! The model's prediction was not accurate. Thanks for your input.";
+            }
+
+            // Hide buttons and display result message
+            rbtn.style.display = "none";
+            wbtn.style.display = "none";
+        }
+    </script>
+</body>
+</html>
