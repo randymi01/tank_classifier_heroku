@@ -2,4 +2,5 @@ Flask
 Pillow==10.0.0
 torch
 torchvision
-gunicorn
+Gunicorn
+requests
