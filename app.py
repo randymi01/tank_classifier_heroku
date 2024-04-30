@@ -156,7 +156,3 @@ def predict_image_upload():
     
     return jsonify({'model':model_type,'prediction': prediction, 'confidence': confidence}), 200
 
-
-
-if __name__ == '__main__':
-    app.run()
