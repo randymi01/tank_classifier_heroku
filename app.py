@@ -5,7 +5,7 @@ import requests as re
 import torch
 import base64
 from torchvision.models import resnet18
-from model import VGG
+from .model import VGG
 
 import torchvision.transforms as transforms
 from PIL import Image
